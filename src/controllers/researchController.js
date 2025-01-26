@@ -53,16 +53,23 @@ exports.getJournals = async (req, res) => {
 exports.analyzeClaims = async (req, res) => {
   try {
     const { influencerId, content } = req.body;
+    console.log(content);
+    
+    // Make sure API key exists
+    if (!process.env.PERPLEXITY_API_KEY) {
+      return res.status(400).json({ message: "API key not configured" });
+    }
+
     const analysis = await perplexityService.analyzeClaim(content);
     
     const claim = new Claim({
       influencerId,
       content,
       category: analysis.category,
-      verificationStatus: analysis.status,
+      verificationStatus: analysis.verificationStatus, // Changed from status
       trustScore: analysis.trustScore,
-      sourceLinks: analysis.sources,
-      aiAnalysis: analysis.explanation
+      sourceLinks: analysis.sourceLinks, // Changed from sources
+      aiAnalysis: analysis.aiAnalysis // Changed from explanation
     });
 
     await claim.save();

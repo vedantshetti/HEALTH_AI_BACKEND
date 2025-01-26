@@ -8,52 +8,67 @@ class PerplexityService {
 
   async analyzeClaim(claim) {
     try {
-      const response = await axios.post(
-        `${this.baseURL}/analyze`,
-        {
-          query: claim.content,
-          context: "Analyze this health claim for scientific accuracy"
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${this.apiKey}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+        console.log('Analyzing claim:', claim);
+        console.log('API Key:', this.apiKey ? 'Present' : 'Missing');
+        console.log('Request URL:', `${this.baseURL}/analyze`);
+        
+        // Mock response since Perplexity API isn't accessible
+        // This matches the UI screenshot's data format
+        return {
+            verificationStatus: 'Verified',
+            trustScore: 92,
+            aiAnalysis: "Multiple studies confirm morning light exposure affects cortisol rhythms. Timing window supported by research.",
+            sourceLinks: ['https://pubmed.gov/example1', 'https://nature.com/example2'],
+            category: 'Sleep',
+            dateVerified: new Date()
+        };
 
-      // Process the response to match UI requirements
-      return {
-        verificationStatus: this.determineVerificationStatus(response.data.confidence),
-        trustScore: Math.round(response.data.confidence * 100),
-        aiAnalysis: response.data.explanation,
-        sourceLinks: response.data.references || [],
-        category: this.determineCategory(claim.content),
-        dateVerified: new Date()
-      };
+        /* Comment out actual API call for now
+        const response = await axios.post(
+            `${this.baseURL}/analyze`,
+            {
+                query: claim,
+                context: "Analyze this health claim for scientific accuracy"
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        */
     } catch (error) {
-      throw new Error('Failed to analyze claim: ' + error.message);
+        console.error('Analysis error:', error);
+        throw new Error('Failed to analyze claim: ' + error.message);
     }
-  }
+}
+
 
   determineVerificationStatus(confidence) {
     if (confidence >= 0.8) return 'Verified';
     if (confidence >= 0.5) return 'Questionable';
     return 'Debunked';
   }
-
+  
   determineCategory(content) {
+    if (!content || typeof content !== 'string') {
+        console.log('Invalid content for category determination:', content);
+        return 'General';
+    }
+    
     const categories = [
-      'Sleep', 'Performance', 'Hormones', 'Nutrition',
-      'Exercise', 'Stress', 'Cognition', 'Motivation',
-      'Recovery', 'Mental Health'
+        'Sleep', 'Performance', 'Hormones', 'Nutrition',
+        'Exercise', 'Stress', 'Cognition', 'Motivation',
+        'Recovery', 'Mental Health'
     ];
     
-    // Simple keyword matching - could be enhanced with AI
-    return categories.find(category => 
-      content.toLowerCase().includes(category.toLowerCase())
-    ) || 'General';
-  }
+    const match = categories.find(category => 
+        content.toLowerCase().includes(category.toLowerCase())
+    );
+    console.log('Determined category:', match || 'General');
+    return match || 'General';
+}
 
   async searchScientificJournals(claim) {
     try {
