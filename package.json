@@ -16,5 +16,8 @@
     "express": "^4.21.2",
     "mongoose": "^8.9.5",
     "openai": "^4.80.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
   }
 }
